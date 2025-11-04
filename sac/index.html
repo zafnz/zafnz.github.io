@@ -172,9 +172,22 @@
     (function registerSW(){
       const pill = document.getElementById('pwa-pill');
       if (!('serviceWorker' in navigator)) { pill.textContent = 'No SW support'; return; }
-      navigator.serviceWorker.register('./sw-v6.js?v=6', { scope: './' })
-        .then(() => { pill.textContent = 'Offline ready'; })
-        .catch((e) => { console.error(e); pill.textContent = 'Offline unavailable'; });
+      
+      // Compute base path for GitHub Pages project sites, e.g. /sac/
+      const basePath = new URL('./', location.href).pathname; // ends with '/'
+      const swUrl = basePath + 'sw-v7.js?v=7';
+      const scope = basePath;
+      // Preflight check so we can surface 404s
+      fetch(swUrl, { cache: 'no-store' }).then(resp => {
+        if (!resp.ok) {
+          pill.textContent = 'SW not found (' + resp.status + '). Check file path: ' + swUrl;
+          return;
+        }
+        return navigator.serviceWorker.register(swUrl, { scope })
+          .then(() => { pill.textContent = 'Offline ready'; })
+          .catch((e) => { console.error(e); pill.textContent = 'Offline unavailable'; });
+      }).catch((e) => { console.error(e); pill.textContent = 'SW fetch failed'; });
+              
     })();
 
     // SAC calculation (metric-only, correct formula)
