@@ -60,7 +60,7 @@
     .row { display: flex; gap: 8px; align-items: baseline; justify-content: space-between; }
     .result { display: grid; gap: 6px; padding: 14px; border-radius: 14px; border: 1px dashed var(--border); background: linear-gradient(180deg, rgba(14,165,233,.08), rgba(99,102,241,.06)); }
     .result .value { font-size: clamp(22px, 7vw, 32px); font-weight: 800; }
-    .pill { font-size: 12px; color: var(--muted); border: 1px solid var(--border); padding: 4px 10px; border-radius: 999px; }
+    
     .cta { display: inline-flex; align-items: center; justify-content: center; gap: 10px; width: 100%; margin-top: 8px; padding: 14px 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,.10); text-decoration: none; color: white; font-weight: 700; background: linear-gradient(135deg, var(--brand), #6366f1); box-shadow: 0 10px 30px -12px var(--ring); }
     footer { margin: 24px 0; color: var(--muted); font-size: 12px; text-align: center; }
     .error { color: var(--danger); }
@@ -82,7 +82,7 @@
         <div class="logo" aria-hidden="true"><img src="./icon-192.png" alt="SAC icon"></div>
         <div class="title">SAC Calculator</div>
       </a>
-      <div class="pill" id="pwa-pill">Checking offline…</div>
+      
     </header>
 
     <main class="card section">
@@ -160,7 +160,7 @@
     </main>
 
     <footer>
-      <div>© Nick Clifford <a href="mailto:nick@nickclifford.com">nick@nickclifford.com</a> • Add to Home Screen for offline use.</div>
+      <div>© Nick Clifford <a href="mailto:nick@nickclifford.com">nick@nickclifford.com</a> — v8</div>
     </footer>
   </div>
 
@@ -183,67 +183,6 @@
           pill.textContent = 'SW not found (' + resp.status + '). Check file path: ' + swUrl;
           return;
         }
-        return navigator.serviceWorker.register(swUrl, { scope })
-          .then(() => { pill.textContent = 'Offline ready'; })
-          .catch((e) => { console.error(e); pill.textContent = 'Offline unavailable'; });
-      }).catch((e) => { console.error(e); pill.textContent = 'SW fetch failed'; });
-              
-    })();
-
-    // SAC calculation (metric-only, correct formula)
-    const $ = sel => document.querySelector(sel);
-    const timeEl = $('#time');
-    const depthEl = $('#depth');
-    const gasEl = $('#gas');
-    const cylEl = $('#cyl');
-    const valueEl = $('#sacValue');
-    const detailEl = $('#sacDetail');
-    const calcBtn = $('#calcBtn');
-
-    function parsePosFloat(el){
-      const v = parseFloat(el.value);
-      return (Number.isFinite(v) && v >= 0) ? v : NaN;
-    }
-
-    function computeSAC(){
-      const t = parsePosFloat(timeEl);
-      const d = parsePosFloat(depthEl);
-      const g = parsePosFloat(gasEl);
-      const c = parsePosFloat(cylEl);
-
-      if ([t,d,g,c].some(x => !Number.isFinite(x)) || t === 0) {
-        valueEl.textContent = '—';
-        detailEl.textContent = 'Enter valid non-negative numbers (time must be > 0).';
-        detailEl.classList.remove('ok'); detailEl.classList.add('error');
-        return;
-      }
-
-      // SAC = (Gas Used * Cylinder Size) / (((Average Depth / 10) + 1) * Time At Depth)
-      const sac = (g * c) / (((d / 10) + 1) * t);
-      const rounded = Math.round(sac * 100) / 100;
-
-      valueEl.textContent = Number.isFinite(rounded) ? `${rounded} L/min` : '—';
-      detailEl.textContent = `Using g=${g} bar, c=${c} L, d=${d} m, t=${t} min.`;
-      detailEl.classList.remove('error'); detailEl.classList.add('ok');
-    }
-
-    calcBtn.addEventListener('click', e => { e.preventDefault(); computeSAC(); });
-    [timeEl, depthEl, gasEl, cylEl].forEach(el => el.addEventListener('input', () => {
-      if ([timeEl, depthEl, gasEl, cylEl].every(x => x.value.trim().length)) computeSAC();
-    }));
-  
-    // Force a service worker update check on load (helps Safari)
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.update())).catch(()=>{});
-      // If still 'Checking offline…' after 4s, hint the user
-      setTimeout(() => {
-        const pill = document.getElementById('pwa-pill');
-        if (pill && /Checking offline/.test(pill.textContent)) {
-          pill.textContent = 'Still checking… If this persists, refresh once.';
-        }
-      }, 4000);
-    }
-
-  </script>
+        return </script>
 </body>
 </html>
