@@ -154,13 +154,14 @@
             <span class="pill">L/min</span>
           </div>
           <div class="value" id="sacValue">—</div>
+<div class="hint" id="barPerMin" style="font-weight:700;opacity:.9"> </div>
           <div class="hint" id="sacDetail">Enter all four values to compute.</div>
         </div>
       </section>
     </main>
 
     <footer>
-      <div>© Nick Clifford <a href="mailto:nick@nickclifford.com">nick@nickclifford.com</a> — v11 (always online)</div>
+      <div>© Nick Clifford <a href="mailto:nick@nickclifford.com">nick@nickclifford.com</a> — v12 (always online)</div>
     </footer>
   </div>
 
@@ -186,7 +187,7 @@
         return 
 // Minimal always-online service worker
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw-v11.js', {scope: './'})
+  navigator.serviceWorker.register('./sw-v12.js', {scope: './'})
     .then(() => console.log('Service Worker (always online) registered'))
     .catch(e => console.error('SW registration failed', e));
 }
