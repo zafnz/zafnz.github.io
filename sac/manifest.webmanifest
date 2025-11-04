@@ -2,7 +2,7 @@
   "name": "SAC Calculator",
   "short_name": "SAC",
   "description": "Surface Air Consumption calculator for scuba dives.",
-  "start_url": "./index.html",
+  "start_url": "./index.html?v=6",
   "scope": "./",
   "display": "standalone",
   "theme_color": "#0ea5e9",

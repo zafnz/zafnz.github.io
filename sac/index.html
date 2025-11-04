@@ -172,7 +172,7 @@
     (function registerSW(){
       const pill = document.getElementById('pwa-pill');
       if (!('serviceWorker' in navigator)) { pill.textContent = 'No SW support'; return; }
-      navigator.serviceWorker.register('./sw-v5.js', { scope: './' })
+      navigator.serviceWorker.register('./sw-v6.js?v=6', { scope: './' })
         .then(() => { pill.textContent = 'Offline ready'; })
         .catch((e) => { console.error(e); pill.textContent = 'Offline unavailable'; });
     })();
@@ -218,6 +218,19 @@
     [timeEl, depthEl, gasEl, cylEl].forEach(el => el.addEventListener('input', () => {
       if ([timeEl, depthEl, gasEl, cylEl].every(x => x.value.trim().length)) computeSAC();
     }));
+  
+    // Force a service worker update check on load (helps Safari)
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.update())).catch(()=>{});
+      // If still 'Checking offline…' after 4s, hint the user
+      setTimeout(() => {
+        const pill = document.getElementById('pwa-pill');
+        if (pill && /Checking offline/.test(pill.textContent)) {
+          pill.textContent = 'Still checking… If this persists, refresh once.';
+        }
+      }, 4000);
+    }
+
   </script>
 </body>
 </html>
