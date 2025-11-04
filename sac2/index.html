@@ -160,7 +160,7 @@
     </main>
 
     <footer>
-      <div>© <span id="year"></span> SAC Calculator • <span>© Nick Clifford <a href="mailto:nick@nickclifford.com">nick@nickclifford.com</a> — v13 (always online)</span></div>
+      <div>© <span id="year"></span> SAC Calculator • <span>© Nick Clifford <a href="mailto:nick@nickclifford.com">nick@nickclifford.com</a> — v13b (always online)</span></div>
     </footer>
   </div>
 
@@ -225,13 +225,24 @@
     
 
     calcBtn.addEventListener('click', e => { e.preventDefault(); computeSAC(); });
-    [timeEl, depthEl, gasEl, cylEl].forEach(el => el.addEventListener('input', () => {
-      if ([timeEl, depthEl, gasEl, cylEl].every(x => x.value.trim().length)) computeSAC();
-    }));
-
+    
+    const readyForBar = () => [timeEl, depthEl, gasEl].every(x => x.value.trim().length);
+    function triggerRecalc(){
+      if (readyForBar()) {
+        computeSAC();
+      } else {
+        // Not enough to compute even bar/min
+        valueEl.textContent = '—';
+        detailEl.textContent = 'Enter time, depth, and gas to compute.';
+        detailEl.classList.remove('ok'); detailEl.classList.add('error');
+      }
+    }
+    ['input','change','keyup'].forEach(evt => {
+      [timeEl, depthEl, gasEl, cylEl].forEach(el => el.addEventListener(evt, triggerRecalc));
+    });
     // Minimal always-online service worker
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw-v13.js', {scope: './'})
+      navigator.serviceWorker.register('./sw-v13b.js', {scope: './'})
         .then(() => console.log('Service Worker (always online) registered'))
         .catch(e => console.error('SW registration failed', e));
     }
