@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>SAC Calculator</title>
+  <meta name="description" content="Surface Air Consumption (SAC) calculator for scuba diving." />
+  <meta name="theme-color" content="#0ea5e9" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAAsSAAALEgHS3X78AAABMUlEQVR4nO3aIUoCURQG4d9O6sQn2d4GmCq1F1Zg8nQkE4nQkQJ9dhqk3i2C4T2Y5M3LR3kGg4w0v9kB8a6n7v5wJkE0u98z8v6i7VQpJdK1f2U7wqWz3u2x6m0Ck0s2qjQp5O3zqv4w+K7qgY9i7sHeQy9b9u8ZcQ0H2Qk7o3H9g2r5E3Hf3zv9Ygk2o1f2qkF9F3m8A9qgV3k8mYQk0wWmYwJtMFlmMCbTBZZjAq3v0m7HqNwZ0i7gQ8aY5kJQ3i3gGdIu4EPGmOZCUN4t4B4d7g7y7nK7R0wq6JcM3tQ2S0K2yV3x1w2v0d0r9rK1Rr9f0g7Q4g6nW+oRz8pQK2m1k5yJ3rZk7z2uKc6iYqgqk6bqQq8rQd4Qb0f8hZ9o6l1tqvJXn3mL4K2s3VQkZrJkQbJmQbJmQf8Qf7qH0Vn0H8rAoZPgqC2wAAAABJRU5ErkJggg==" />
+  <style>
+    :root {
+      --bg: #0b1020;
+      --fg: #ebeff7;
+      --muted: #9aa3b2;
+      --card: #111931;
+      --border: rgba(255,255,255,.10);
+      --brand: #0ea5e9;
+      --ring: rgba(14,165,233,.35);
+      --danger: #ef4444;
+      --success: #22c55e;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f7fafc;
+        --fg: #0b1020;
+        --muted: #5c667a;
+        --card: #ffffff;
+        --border: rgba(10,20,40,.08);
+      }
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: -apple-system, system-ui, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background: radial-gradient(1200px 800px at 80% -10%, rgba(14,165,233,.12), transparent 60%), var(--bg);
+      color: var(--fg);
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    .wrap {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    header {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 10px 0 16px;
+    }
+    .brand { display: inline-flex; gap: 10px; align-items: center; text-decoration: none; color: inherit; }
+    .logo { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, var(--brand), #6366f1);
+            display: grid; place-items: center; box-shadow: 0 8px 24px -8px var(--ring); }
+    .logo span { color: white; font-weight: 800; }
+    .title { font-weight: 800; letter-spacing: .2px; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 16px 40px -28px rgba(0,0,0,.6);
+    }
+    .section + .section { margin-top: 16px; }
+    .grid { display: grid; gap: 12px; }
+    .field {
+      display: grid; gap: 8px;
+    }
+    label {
+      font-size: 13px; color: var(--muted);
+    }
+    .input {
+      appearance: none; -webkit-appearance: none;
+      width: 100%;
+      font-size: 16px;
+      background: rgba(255,255,255,.02);
+      color: var(--fg);
+      padding: 14px 14px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      outline: none;
+      transition: box-shadow .15s ease, border-color .15s ease, background .15s ease;
+    }
+    .input:focus {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 6px var(--ring);
+      background: rgba(255,255,255,.03);
+    }
+    .hint { font-size: 12px; color: var(--muted); }
+    .units {
+      font-size: 12px; padding: 4px 8px; border: 1px solid var(--border); border-radius: 999px;
+      display: inline-block; color: var(--muted);
+    }
+    .row { display: flex; gap: 8px; align-items: baseline; justify-content: space-between; }
+    .result {
+      display: grid; gap: 6px; padding: 14px; border-radius: 14px; border: 1px dashed var(--border);
+      background: linear-gradient(180deg, rgba(14,165,233,.08), rgba(99,102,241,.06));
+    }
+    .result .value { font-size: clamp(22px, 7vw, 32px); font-weight: 800; }
+    .pill { font-size: 12px; color: var(--muted); border: 1px solid var(--border); padding: 4px 10px; border-radius: 999px; }
+    .cta {
+      display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+      width: 100%; margin-top: 8px; padding: 14px 16px; border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.10); text-decoration: none;
+      color: white; font-weight: 700; background: linear-gradient(135deg, var(--brand), #6366f1);
+      box-shadow: 0 10px 30px -12px var(--ring);
+    }
+    footer { margin: 24px 0; color: var(--muted); font-size: 12px; text-align: center; }
+    .error { color: var(--danger); }
+    .ok { color: var(--success); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <a class="brand" href="#top" aria-label="SAC Calculator Home">
+        <div class="logo" aria-hidden="true"><span>🫧</span></div>
+        <div class="title">SAC Calculator</div>
+      </a>
+      <div class="pill" id="pwa-pill">Checking offline…</div>
+    </header>
+
+    <main class="card section">
+      <div class="grid">
+        <div class="field">
+          <div class="row">
+            <label for="time">Time At Depth</label>
+            <span class="units">minutes</span>
+          </div>
+          <input class="input" id="time" type="number" inputmode="decimal" step="any" min="0" placeholder="e.g., 42.5" autocomplete="off" />
+          <div class="hint">Total time spent at the average depth.</div>
+        </div>
+
+        <div class="field">
+          <div class="row">
+            <label for="depth">Average Depth</label>
+            <span class="units">meters</span>
+          </div>
+          <input class="input" id="depth" type="number" inputmode="decimal" step="any" min="0" placeholder="e.g., 18" autocomplete="off" />
+          <div class="hint">Mean depth over the interval (salt/fresh differences are negligible for pressure). </div>
+        </div>
+
+        <div class="field">
+          <div class="row">
+            <label for="gas">Gas Used</label>
+            <span class="units">bar</span>
+          </div>
+          <input class="input" id="gas" type="number" inputmode="decimal" step="any" min="0" placeholder="e.g., 45" autocomplete="off" />
+          <div class="hint">Pressure drop (start bar − end bar).</div>
+        </div>
+
+        <div class="field">
+          <div class="row">
+            <label for="cyl">Cylinder Size</label>
+            <span class="units">litres</span>
+          </div>
+          <input class="input" id="cyl" type="number" inputmode="decimal" step="any" min="0" placeholder="e.g., 12" autocomplete="off" />
+          <div class="hint">Water capacity (e.g., 12L). Result is standard litres per minute.</div>
+        </div>
+      </div>
+
+      <a class="cta" href="#result" id="calcBtn">Calculate SAC</a>
+
+      <section id="result" class="section">
+        <div class="result" role="status" aria-live="polite">
+          <div class="row">
+            <strong>SAC</strong>
+            <span class="pill">L/min</span>
+          </div>
+          <div class="value" id="sacValue">—</div>
+          <div class="hint" id="sacDetail">Enter all four values to compute.</div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div>© <span id="year"></span> SAC Calculator • Add to Home Screen for offline use.</div>
+    </footer>
+  </div>
+
+  <script>
+    // Year
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Manifest (created on the fly so page stays single-file)
+    (function initManifest(){
+      const manifest = {
+        name: "SAC Calculator",
+        short_name: "SAC",
+        description: "Surface Air Consumption calculator for scuba dives.",
+        start_url: ".",
+        display: "standalone",
+        background_color: "#0b1020",
+        theme_color: "#0ea5e9",
+        icons: [
+          { "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAAsSAAALEgHS3X78AAABMUlEQVR4nO3aIUoCURQG4d9O6sQn2d4GmCq1F1Zg8nQkE4nQkQJ9dhqk3i2C4T2Y5M3LR3kGg4w0v9kB8a6n7v5wJkE0u98z8v6i7VQpJdK1f2U7wqWz3u2x6m0Ck0s2qjQp5O3zqv4w+K7qgY9i7sHeQy9b9u8ZcQ0H2Qk7o3H9g2r5E3Hf3zv9Ygk2o1f2qkF9F3m8A9qgV3k8mYQk0wWmYwJtMFlmMCbTBZZjAq3v0m7HqNwZ0i7gQ8aY5kJQ3i3gGdIu4EPGmOZCUN4t4B4d7g7y7nK7R0wq6JcM3tQ2S0K2yV3x1w2v0d0r9rK1Rr9f0g7Q4g6nW+oRz8pQK2m1k5yJ3rZk7z2uKc6iYqgqk6bqQq8rQd4Qb0f8hZ9o6l1tqvJXn3mL4K2s3VQkZrJkQbJmQbJmQf8Qf7qH0Vn0H8rAoZPgqC2wAAAABJRU5ErkJggg==" , "sizes": "192x192", "type":"image/png"}
+        ]
+      };
+      const blob = new Blob([JSON.stringify(manifest)], {type:"application/json"});
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('link');
+      link.rel = "manifest";
+      link.href = url;
+      document.head.appendChild(link);
+    })();
+
+    // Inlined service worker keeps it installable/offline as a single file
+    (function registerSW(){
+      const pill = document.getElementById('pwa-pill');
+      if (!('serviceWorker' in navigator)) {
+        pill.textContent = 'No SW support';
+        return;
+      }
+      const swCode = `
+        const CACHE = 'sac-pwa-v1';
+        const ASSETS = ['/', './', 'sac-calculator.html', 'index.html']; // fallbacks
+        self.addEventListener('install', e => {
+          e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
+          self.skipWaiting();
+        });
+        self.addEventListener('activate', e => {
+          e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))));
+          self.clients.claim();
+        });
+        self.addEventListener('fetch', e => {
+          e.respondWith(
+            caches.match(e.request).then(r => r || fetch(e.request).then(resp => {
+              const copy = resp.clone();
+              caches.open(CACHE).then(c => c.put(e.request, copy)).catch(()=>{});
+              return resp;
+            }).catch(()=>caches.match('sac-calculator.html')))
+          );
+        });
+      `;
+      const blob = new Blob([swCode], { type: 'text/javascript' });
+      const swUrl = URL.createObjectURL(blob);
+      navigator.serviceWorker.register(swUrl).then(() => {
+        pill.textContent = 'Offline ready';
+      }).catch(() => { pill.textContent = 'Offline unavailable'; });
+    })();
+
+    // SAC calculation
+    const $ = sel => document.querySelector(sel);
+    const timeEl = $('#time');
+    const depthEl = $('#depth');
+    const gasEl = $('#gas');
+    const cylEl = $('#cyl');
+    const valueEl = $('#sacValue');
+    const detailEl = $('#sacDetail');
+    const calcBtn = $('#calcBtn');
+
+    function parsePosFloat(el){
+      const v = parseFloat(el.value);
+      return (Number.isFinite(v) && v >= 0) ? v : NaN;
+    }
+
+    function computeSAC(){
+      const t = parsePosFloat(timeEl);
+      const d = parsePosFloat(depthEl);
+      const g = parsePosFloat(gasEl);
+      const c = parsePosFloat(cylEl);
+
+      if ([t,d,g,c].some(x => !Number.isFinite(x)) || t === 0) {
+        valueEl.textContent = '—';
+        detailEl.textContent = 'Enter valid non‑negative numbers (time must be > 0).';
+        detailEl.classList.remove('ok'); detailEl.classList.add('error');
+        return;
+      }
+
+      // SAC = (Gas Used * Cylinder Size) / (((Average Depth / 10) + 1) / Time At Depth)
+      const sac = (g * c) / (((d / 10) + 1) / t); // L/min
+      const rounded = Math.round(sac * 100) / 100; // 2dp
+
+      valueEl.textContent = isFinite(rounded) ? `${rounded} L/min` : '—';
+      detailEl.textContent = `Using g=${g} bar, c=${c} L, d=${d} m, t=${t} min.`;
+      detailEl.classList.remove('error'); detailEl.classList.add('ok');
+    }
+
+    // Calculate on button tap and on input changes for convenience
+    calcBtn.addEventListener('click', e => { e.preventDefault(); computeSAC(); });
+    [timeEl, depthEl, gasEl, cylEl].forEach(el => el.addEventListener('input', () => {
+      // Optionally auto-update if all fields are filled
+      if ([timeEl, depthEl, gasEl, cylEl].every(x => x.value.trim().length)) computeSAC();
+    }));
+
+    // iOS install tip: show native Add to Home Screen via beforeinstallprompt (supported on Chrome)
+    window.addEventListener('beforeinstallprompt', (e) => {
+      // Do nothing special; page is installable via browser menu.
+    });
+  </script>
+</body>
+</html>
