@@ -269,7 +269,8 @@
       }
 
       // SAC = (Gas Used * Cylinder Size) / (((Average Depth / 10) + 1) / Time At Depth)
-      const sac = (g * c) / (((d / 10) + 1) / t); // L/min
+      //const sac = (g * c) / (((d / 10) + 1) / t); // L/min
+      const sac = ((g * c) / ((d / 10) + 1)) / t; // L/min
       const rounded = Math.round(sac * 100) / 100; // 2dp
 
       valueEl.textContent = isFinite(rounded) ? `${rounded} L/min` : '—';
