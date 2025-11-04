@@ -60,7 +60,7 @@
     .row { display: flex; gap: 8px; align-items: baseline; justify-content: space-between; }
     .result { display: grid; gap: 6px; padding: 14px; border-radius: 14px; border: 1px dashed var(--border); background: linear-gradient(180deg, rgba(14,165,233,.08), rgba(99,102,241,.06)); }
     .result .value { font-size: clamp(22px, 7vw, 32px); font-weight: 800; }
-    
+    .pill { font-size: 12px; color: var(--muted); border: 1px solid var(--border); padding: 4px 10px; border-radius: 999px; }
     .cta { display: inline-flex; align-items: center; justify-content: center; gap: 10px; width: 100%; margin-top: 8px; padding: 14px 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,.10); text-decoration: none; color: white; font-weight: 700; background: linear-gradient(135deg, var(--brand), #6366f1); box-shadow: 0 10px 30px -12px var(--ring); }
     footer { margin: 24px 0; color: var(--muted); font-size: 12px; text-align: center; }
     .error { color: var(--danger); }
@@ -82,7 +82,6 @@
         <div class="logo" aria-hidden="true"><img src="./icon-192.png" alt="SAC icon"></div>
         <div class="title">SAC Calculator</div>
       </a>
-      
     </header>
 
     <main class="card section">
@@ -99,7 +98,7 @@
 </svg></div><label for="time">Time At Depth</label></div>
             <span class="units">minutes</span>
           </div>
-          <input class="input" id="time" type="number" inputmode="decimal" step="any" min="0" placeholder="e.g., 30" autocomplete="off" />
+          <input class="input" id="time" type="number" inputmode="decimal" step="any" min="0" placeholder="e.g., 30" autocomplete="off" / value="52">
           <div class="hint">Total time spent at the average depth.</div>
         </div>
 
@@ -113,7 +112,7 @@
 </svg></div><label for="depth">Average Depth</label></div>
             <span class="units">meters</span>
           </div>
-          <input class="input" id="depth" type="number" inputmode="decimal" step="any" min="0" placeholder="e.g., 20" autocomplete="off" />
+          <input class="input" id="depth" type="number" inputmode="decimal" step="any" min="0" placeholder="e.g., 20" autocomplete="off" / value="19.1">
           <div class="hint">Mean depth over the interval.</div>
         </div>
 
@@ -127,7 +126,7 @@
 </svg></div><label for="gas">Gas Used</label></div>
             <span class="units">bar</span>
           </div>
-          <input class="input" id="gas" type="number" inputmode="decimal" step="any" min="0" placeholder="e.g., 150" autocomplete="off" />
+          <input class="input" id="gas" type="number" inputmode="decimal" step="any" min="0" placeholder="e.g., 150" autocomplete="off" / value="97">
           <div class="hint">Pressure drop (start bar − end bar).</div>
         </div>
 
@@ -140,7 +139,7 @@
 </svg></div><label for="cyl">Cylinder Size</label></div>
             <span class="units">litres</span>
           </div>
-          <input class="input" id="cyl" type="number" inputmode="decimal" step="any" min="0" placeholder="e.g., 12.2" autocomplete="off" />
+          <input class="input" id="cyl" type="number" inputmode="decimal" step="any" min="0" placeholder="e.g., 12.2" autocomplete="off" / value="11.1">
           <div class="hint">Water capacity (e.g., 12.2L). Result is L/min.</div>
         </div>
       </div>
@@ -154,14 +153,14 @@
             <span class="pill">L/min</span>
           </div>
           <div class="value" id="sacValue">—</div>
-<div class="hint" id="barPerMin" style="font-weight:700;opacity:.9"> </div>
+          <div class="hint" id="barPerMin" style="font-weight:700;opacity:.9"></div>
           <div class="hint" id="sacDetail">Enter all four values to compute.</div>
         </div>
       </section>
     </main>
 
     <footer>
-      <div>© Nick Clifford <a href="mailto:nick@nickclifford.com">nick@nickclifford.com</a> — v12 (always online)</div>
+      <div>© <span id="year"></span> SAC Calculator • <span>© Nick Clifford <a href="mailto:nick@nickclifford.com">nick@nickclifford.com</a> — v13 (always online)</span></div>
     </footer>
   </div>
 
@@ -169,29 +168,73 @@
     // Year
     document.getElementById('year').textContent = new Date().getFullYear();
 
-    // Register service worker (GitHub Pages compatible)
-    (function registerSW(){
-      const pill = document.getElementById('pwa-pill');
-      if (!('serviceWorker' in navigator)) { pill.textContent = 'No SW support'; return; }
-      
-      // Compute base path for GitHub Pages project sites, e.g. /sac/
-      const basePath = new URL('./', location.href).pathname; // ends with '/'
-      const swUrl = basePath + 'sw-v7.js?v=7';
-      const scope = basePath;
-      // Preflight check so we can surface 404s
-      fetch(swUrl, { cache: 'no-store' }).then(resp => {
-        if (!resp.ok) {
-          pill.textContent = 'SW not found (' + resp.status + '). Check file path: ' + swUrl;
-          return;
-        }
-        return 
-// Minimal always-online service worker
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw-v12.js', {scope: './'})
-    .then(() => console.log('Service Worker (always online) registered'))
-    .catch(e => console.error('SW registration failed', e));
-}
-</script>
+    // SAC calculation (metric-only, correct formula) + bar/min display
+    const $ = sel => document.querySelector(sel);
+    const timeEl = $('#time');
+    const depthEl = $('#depth');
+    const gasEl = $('#gas');
+    const cylEl = $('#cyl');
+    const valueEl = $('#sacValue');
+    const detailEl = $('#sacDetail');
+    const calcBtn = $('#calcBtn');
+    const barEl = document.getElementById('barPerMin');
 
+    function parsePosFloat(el){
+      const v = parseFloat(el.value);
+      return (Number.isFinite(v) && v >= 0) ? v : NaN;
+    }
+
+    
+    function computeSAC(){
+      const t = parsePosFloat(timeEl);
+      const d = parsePosFloat(depthEl);
+      const g = parsePosFloat(gasEl);
+      const c = parsePosFloat(cylEl);
+
+      if ([t,d,g].some(x => !Number.isFinite(x)) || t === 0) {
+        valueEl.textContent = '—';
+        detailEl.textContent = 'Enter valid non-negative numbers (time must be > 0).';
+        detailEl.classList.remove('ok'); detailEl.classList.add('error');
+        if (barEl) barEl.textContent = '';
+        return;
+      }
+
+      // Pressure factor at depth
+      const p = (d / 10) + 1;
+
+      // bar/min does not require cylinder size
+      const barPerMinRaw = g / (p * t);
+      const barPerMin = Math.round(barPerMinRaw * 100) / 100;
+
+      let display = Number.isFinite(barPerMin) ? `${barPerMin} bar/min` : '—';
+
+      // If cylinder size is valid, compute L/min too
+      if (Number.isFinite(c) && c > 0) {
+        const lpmRaw = (g * c) / (p * t);
+        const lpm = Math.round(lpmRaw * 100) / 100;
+        if (Number.isFinite(lpm)) {
+          display = `${barPerMin} bar/min (${lpm} L/min)`;
+        }
+      }
+
+      valueEl.textContent = display;
+      if (barEl) barEl.textContent = ''; // we now show both in one line
+      detailEl.textContent = `Using g=${g} bar, c=${Number.isFinite(c)?c:'—'} L, d=${d} m, t=${t} min.`;
+      detailEl.classList.remove('error'); detailEl.classList.add('ok');
+    }
+    
+
+    calcBtn.addEventListener('click', e => { e.preventDefault(); computeSAC(); });
+    [timeEl, depthEl, gasEl, cylEl].forEach(el => el.addEventListener('input', () => {
+      if ([timeEl, depthEl, gasEl, cylEl].every(x => x.value.trim().length)) computeSAC();
+    }));
+
+    // Minimal always-online service worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw-v13.js', {scope: './'})
+        .then(() => console.log('Service Worker (always online) registered'))
+        .catch(e => console.error('SW registration failed', e));
+    }
+  </script>
 </body>
 </html>
