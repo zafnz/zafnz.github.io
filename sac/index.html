@@ -65,6 +65,14 @@
     footer { margin: 24px 0; color: var(--muted); font-size: 12px; text-align: center; }
     .error { color: var(--danger); }
     .ok { color: var(--success); }
+  
+    .label-row { display:flex; align-items:center; gap:10px; }
+    .label-row img.icon { width:20px; height:20px; border-radius:6px; box-shadow: 0 4px 12px -6px rgba(14,165,233,.6); }
+
+  
+    .label-row .icon { width:20px; height:20px; border-radius:6px; box-shadow: 0 4px 12px -6px rgba(14,165,233,.6); overflow:hidden; flex-shrink:0; }
+    .label-row .icon svg { width:100%; height:100%; display:block; }
+
   </style>
 </head>
 <body>
@@ -81,7 +89,14 @@
       <div class="grid">
         <div class="field">
           <div class="row">
-            <label for="time">Time At Depth</label>
+            <div class="label-row"><div class="icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14" fill="#0ea5e9"/>
+  <circle cx="32" cy="36" r="18" fill="none" stroke="#ffffff" stroke-width="3"/>
+  <path d="M28 12h8" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+  <rect x="29" y="8" width="6" height="6" rx="1.5" fill="#ffffff"/>
+  <path d="M32 36l8-6" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="32" cy="36" r="2" fill="#ffffff"/>
+</svg></div><label for="time">Time At Depth</label></div>
             <span class="units">minutes</span>
           </div>
           <input class="input" id="time" type="number" inputmode="decimal" step="any" min="0" placeholder="e.g., 30" autocomplete="off" />
@@ -90,7 +105,12 @@
 
         <div class="field">
           <div class="row">
-            <label for="depth">Average Depth</label>
+            <div class="label-row"><div class="icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14" fill="#0ea5e9"/>
+  <path d="M10 22c4 0 6-4 10-4s6 4 10 4 6-4 10-4 6 4 10 4" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+  <path d="M32 26v20" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+  <path d="M24 40l8 8 8-8" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</svg></div><label for="depth">Average Depth</label></div>
             <span class="units">meters</span>
           </div>
           <input class="input" id="depth" type="number" inputmode="decimal" step="any" min="0" placeholder="e.g., 20" autocomplete="off" />
@@ -99,7 +119,12 @@
 
         <div class="field">
           <div class="row">
-            <label for="gas">Gas Used</label>
+            <div class="label-row"><div class="icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14" fill="#0ea5e9"/>
+  <rect x="24" y="18" width="16" height="28" rx="6" fill="none" stroke="#ffffff" stroke-width="3"/>
+  <rect x="21" y="16" width="22" height="6" rx="3" fill="#ffffff"/>
+  <rect x="28" y="10" width="8" height="6" rx="2" fill="#ffffff"/>
+</svg></div><label for="gas">Gas Used</label></div>
             <span class="units">bar</span>
           </div>
           <input class="input" id="gas" type="number" inputmode="decimal" step="any" min="0" placeholder="e.g., 150" autocomplete="off" />
@@ -108,7 +133,11 @@
 
         <div class="field">
           <div class="row">
-            <label for="cyl">Cylinder Size</label>
+            <div class="label-row"><div class="icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14" fill="#0ea5e9"/>
+  <rect x="10" y="28" width="44" height="12" rx="4" fill="none" stroke="#ffffff" stroke-width="3"/>
+  <path d="M16 28v12M22 28v8M28 28v12M34 28v8M40 28v12M46 28v8M52 28v12" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+</svg></div><label for="cyl">Cylinder Size</label></div>
             <span class="units">litres</span>
           </div>
           <input class="input" id="cyl" type="number" inputmode="decimal" step="any" min="0" placeholder="e.g., 12.2" autocomplete="off" />
@@ -143,7 +172,7 @@
     (function registerSW(){
       const pill = document.getElementById('pwa-pill');
       if (!('serviceWorker' in navigator)) { pill.textContent = 'No SW support'; return; }
-      navigator.serviceWorker.register('./sw-v3.js', { scope: './' })
+      navigator.serviceWorker.register('./sw-v5.js', { scope: './' })
         .then(() => { pill.textContent = 'Offline ready'; })
         .catch((e) => { console.error(e); pill.textContent = 'Offline unavailable'; });
     })();
