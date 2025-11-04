@@ -1,5 +1,5 @@
 /* Offline cache for SAC Calculator (GitHub Pages compatible) */
-const CACHE = 'sac-pwa-final-v1';
+const CACHE = 'sac-pwa-final-v2';
 const ASSETS = ['./', './index.html', './icon-192.png', './icon-512.png', './manifest.webmanifest'];
 
 self.addEventListener('install', (event) => {
