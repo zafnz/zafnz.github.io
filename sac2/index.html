@@ -98,7 +98,7 @@
 </svg></div><label for="time">Time At Depth</label></div>
             <span class="units">minutes</span>
           </div>
-          <input class="input" id="time" type="number" inputmode="decimal" step="any" min="0" placeholder="e.g., 30" autocomplete="off" />
+          <input class="input" id="time" type="number" inputmode="decimal" step="any" min="0" placeholder="e.g., 30" autocomplete="off" / value="52">
           <div class="hint">Total time spent at the average depth.</div>
         </div>
 
@@ -112,7 +112,7 @@
 </svg></div><label for="depth">Average Depth</label></div>
             <span class="units">meters</span>
           </div>
-          <input class="input" id="depth" type="number" inputmode="decimal" step="any" min="0" placeholder="e.g., 20" autocomplete="off" />
+          <input class="input" id="depth" type="number" inputmode="decimal" step="any" min="0" placeholder="e.g., 20" autocomplete="off" / value="19.1">
           <div class="hint">Mean depth over the interval.</div>
         </div>
 
@@ -126,7 +126,7 @@
 </svg></div><label for="gas">Gas Used</label></div>
             <span class="units">bar</span>
           </div>
-          <input class="input" id="gas" type="number" inputmode="decimal" step="any" min="0" placeholder="e.g., 150" autocomplete="off" />
+          <input class="input" id="gas" type="number" inputmode="decimal" step="any" min="0" placeholder="e.g., 150" autocomplete="off" / value="97">
           <div class="hint">Pressure drop (start bar − end bar).</div>
         </div>
 
@@ -139,7 +139,7 @@
 </svg></div><label for="cyl">Cylinder Size</label></div>
             <span class="units">litres</span>
           </div>
-          <input class="input" id="cyl" type="number" inputmode="decimal" step="any" min="0" placeholder="e.g., 12.2" autocomplete="off" />
+          <input class="input" id="cyl" type="number" inputmode="decimal" step="any" min="0" placeholder="e.g., 12.2" autocomplete="off" / value="11.1">
           <div class="hint">Water capacity (e.g., 12.2L). Result is L/min.</div>
         </div>
       </div>
@@ -160,7 +160,7 @@
     </main>
 
     <footer>
-      <div>© <span id="year"></span> SAC Calculator • <span>© Nick Clifford <a href="mailto:nick@nickclifford.com">nick@nickclifford.com</a> — v12c (always online)</span></div>
+      <div>© <span id="year"></span> SAC Calculator • <span>© Nick Clifford <a href="mailto:nick@nickclifford.com">nick@nickclifford.com</a> — v13 (always online)</span></div>
     </footer>
   </div>
 
@@ -184,13 +184,14 @@
       return (Number.isFinite(v) && v >= 0) ? v : NaN;
     }
 
+    
     function computeSAC(){
       const t = parsePosFloat(timeEl);
       const d = parsePosFloat(depthEl);
       const g = parsePosFloat(gasEl);
       const c = parsePosFloat(cylEl);
 
-      if ([t,d,g,c].some(x => !Number.isFinite(x)) || t === 0) {
+      if ([t,d,g].some(x => !Number.isFinite(x)) || t === 0) {
         valueEl.textContent = '—';
         detailEl.textContent = 'Enter valid non-negative numbers (time must be > 0).';
         detailEl.classList.remove('ok'); detailEl.classList.add('error');
@@ -198,20 +199,30 @@
         return;
       }
 
-      // SAC = (Gas Used * Cylinder Size) / (((Average Depth / 10) + 1) * Time At Depth)
-      const sac = (g * c) / (((d / 10) + 1) * t);
-      const rounded = Math.round(sac * 100) / 100;
+      // Pressure factor at depth
+      const p = (d / 10) + 1;
 
-      valueEl.textContent = Number.isFinite(rounded) ? `${rounded} L/min` : '—';
-      if (barEl && c > 0) {
-        const barPerMin = Math.round((rounded / c) * 100) / 100;
-        barEl.textContent = `${barPerMin} bar/min`;
-      } else if (barEl) {
-        barEl.textContent = '';
+      // bar/min does not require cylinder size
+      const barPerMinRaw = g / (p * t);
+      const barPerMin = Math.round(barPerMinRaw * 100) / 100;
+
+      let display = Number.isFinite(barPerMin) ? `${barPerMin} bar/min` : '—';
+
+      // If cylinder size is valid, compute L/min too
+      if (Number.isFinite(c) && c > 0) {
+        const lpmRaw = (g * c) / (p * t);
+        const lpm = Math.round(lpmRaw * 100) / 100;
+        if (Number.isFinite(lpm)) {
+          display = `${barPerMin} bar/min (${lpm} L/min)`;
+        }
       }
-      detailEl.textContent = `Using g=${g} bar, c=${c} L, d=${d} m, t=${t} min.`;
+
+      valueEl.textContent = display;
+      if (barEl) barEl.textContent = ''; // we now show both in one line
+      detailEl.textContent = `Using g=${g} bar, c=${Number.isFinite(c)?c:'—'} L, d=${d} m, t=${t} min.`;
       detailEl.classList.remove('error'); detailEl.classList.add('ok');
     }
+    
 
     calcBtn.addEventListener('click', e => { e.preventDefault(); computeSAC(); });
     [timeEl, depthEl, gasEl, cylEl].forEach(el => el.addEventListener('input', () => {
@@ -220,7 +231,7 @@
 
     // Minimal always-online service worker
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw-v12.js', {scope: './'})
+      navigator.serviceWorker.register('./sw-v13.js', {scope: './'})
         .then(() => console.log('Service Worker (always online) registered'))
         .catch(e => console.error('SW registration failed', e));
     }
