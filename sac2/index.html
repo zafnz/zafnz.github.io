@@ -98,7 +98,7 @@
 </svg></div><label for="time">Time At Depth</label></div>
             <span class="units">minutes</span>
           </div>
-          <input class="input" id="time" type="number" inputmode="decimal" step="any" min="0" placeholder="e.g., 30" autocomplete="off" / value="52">
+          <input class="input" id="time" type="number" inputmode="decimal" step="any" min="0" placeholder="e.g., 30" autocomplete="off" />
           <div class="hint">Total time spent at the average depth.</div>
         </div>
 
@@ -112,7 +112,7 @@
 </svg></div><label for="depth">Average Depth</label></div>
             <span class="units">meters</span>
           </div>
-          <input class="input" id="depth" type="number" inputmode="decimal" step="any" min="0" placeholder="e.g., 20" autocomplete="off" / value="19.1">
+          <input class="input" id="depth" type="number" inputmode="decimal" step="any" min="0" placeholder="e.g., 20" autocomplete="off" />
           <div class="hint">Mean depth over the interval.</div>
         </div>
 
@@ -126,7 +126,7 @@
 </svg></div><label for="gas">Gas Used</label></div>
             <span class="units">bar</span>
           </div>
-          <input class="input" id="gas" type="number" inputmode="decimal" step="any" min="0" placeholder="e.g., 150" autocomplete="off" / value="97">
+          <input class="input" id="gas" type="number" inputmode="decimal" step="any" min="0" placeholder="e.g., 150" autocomplete="off" />
           <div class="hint">Pressure drop (start bar − end bar).</div>
         </div>
 
@@ -139,7 +139,7 @@
 </svg></div><label for="cyl">Cylinder Size</label></div>
             <span class="units">litres</span>
           </div>
-          <input class="input" id="cyl" type="number" inputmode="decimal" step="any" min="0" placeholder="e.g., 12.2" autocomplete="off" / value="11.1">
+          <input class="input" id="cyl" type="number" inputmode="decimal" step="any" min="0" placeholder="e.g., 12.2" autocomplete="off" />
           <div class="hint">Water capacity (e.g., 12.2L). Result is L/min.</div>
         </div>
       </div>
@@ -160,7 +160,7 @@
     </main>
 
     <footer>
-      <div>© <span id="year"></span> SAC Calculator • <span>© Nick Clifford <a href="mailto:nick@nickclifford.com">nick@nickclifford.com</a> — v13b (always online)</span></div>
+      <div>© <span id="year"></span> SAC Calculator • <span>© Nick Clifford <a href="mailto:nick@nickclifford.com">nick@nickclifford.com</a> — v13c</span></div>
     </footer>
   </div>
 
@@ -242,7 +242,7 @@
     });
     // Minimal always-online service worker
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw-v13b.js', {scope: './'})
+      navigator.serviceWorker.register('./sw-v13c.js', {scope: './'})
         .then(() => console.log('Service Worker (always online) registered'))
         .catch(e => console.error('SW registration failed', e));
     }
