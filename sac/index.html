@@ -143,7 +143,7 @@
     (function registerSW(){
       const pill = document.getElementById('pwa-pill');
       if (!('serviceWorker' in navigator)) { pill.textContent = 'No SW support'; return; }
-      navigator.serviceWorker.register('./sw.js', { scope: './' })
+      navigator.serviceWorker.register('./sw-v3.js', { scope: './' })
         .then(() => { pill.textContent = 'Offline ready'; })
         .catch((e) => { console.error(e); pill.textContent = 'Offline unavailable'; });
     })();
