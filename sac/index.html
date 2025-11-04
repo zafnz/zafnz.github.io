@@ -45,8 +45,8 @@
     .wrap { max-width: 680px; margin: 0 auto; padding: 20px; }
     header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0 16px; }
     .brand { display: inline-flex; gap: 10px; align-items: center; text-decoration: none; color: inherit; }
-    .logo { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, var(--brand), #6366f1); display: grid; place-items: center; box-shadow: 0 8px 24px -8px var(--ring); }
-    .logo span { color: white; font-weight: 800; }
+    .logo { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, var(--brand), #6366f1); display: grid; place-items: center; box-shadow: 0 8px 24px -8px var(--ring); overflow: hidden; }
+    .logo img { width: 100%; height: 100%; object-fit: cover; }
     .title { font-weight: 800; letter-spacing: .2px; }
     .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 18px; box-shadow: 0 16px 40px -28px rgba(0,0,0,.6); }
     .section + .section { margin-top: 16px; }
@@ -65,18 +65,13 @@
     footer { margin: 24px 0; color: var(--muted); font-size: 12px; text-align: center; }
     .error { color: var(--danger); }
     .ok { color: var(--success); }
-    /* toggle */
-    .toggle { display: inline-flex; align-items: center; gap: 10px; }
-    .switch { position: relative; width: 52px; height: 30px; background: rgba(255,255,255,.15); border-radius: 999px; border: 1px solid var(--border); }
-    .knob { position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; background: white; border-radius: 50%; transition: transform .2s ease; }
-    .switch.on .knob { transform: translateX(22px); }
   </style>
 </head>
 <body>
   <div class="wrap">
     <header>
       <a class="brand" href="#top" aria-label="SAC Calculator Home">
-        <div class="logo" aria-hidden="true"><span>🫧</span></div>
+        <div class="logo" aria-hidden="true"><img src="./icon-192.png" alt="SAC icon"></div>
         <div class="title">SAC Calculator</div>
       </a>
       <div class="pill" id="pwa-pill">Checking offline…</div>
@@ -84,13 +79,6 @@
 
     <main class="card section">
       <div class="grid">
-        <div class="row" style="align-items:center; justify-content:flex-start; gap:14px;">
-          <div class="toggle" id="unitToggleWrap" role="switch" aria-checked="false" tabindex="0" aria-label="Toggle imperial units">
-            <div class="switch" id="unitSwitch"><div class="knob"></div></div>
-            <div><strong id="unitLabel">Metric</strong> <span class="hint" id="unitHint">Gas in bar • Result L/min</span></div>
-          </div>
-        </div>
-
         <div class="field">
           <div class="row">
             <label for="time">Time At Depth</label>
@@ -106,16 +94,16 @@
             <span class="units">meters</span>
           </div>
           <input class="input" id="depth" type="number" inputmode="decimal" step="any" min="0" placeholder="e.g., 20" autocomplete="off" />
-          <div class="hint">Mean depth over the interval (depth uses meters in both modes).</div>
+          <div class="hint">Mean depth over the interval.</div>
         </div>
 
         <div class="field">
           <div class="row">
             <label for="gas">Gas Used</label>
-            <span class="units" id="gasUnits">bar</span>
+            <span class="units">bar</span>
           </div>
           <input class="input" id="gas" type="number" inputmode="decimal" step="any" min="0" placeholder="e.g., 150" autocomplete="off" />
-          <div class="hint" id="gasHint">Pressure drop (start bar − end bar).</div>
+          <div class="hint">Pressure drop (start bar − end bar).</div>
         </div>
 
         <div class="field">
@@ -124,7 +112,7 @@
             <span class="units">litres</span>
           </div>
           <input class="input" id="cyl" type="number" inputmode="decimal" step="any" min="0" placeholder="e.g., 12.2" autocomplete="off" />
-          <div class="hint">Water capacity (L). In imperial mode we still use L here for accuracy.</div>
+          <div class="hint">Water capacity (e.g., 12.2L). Result is L/min.</div>
         </div>
       </div>
 
@@ -134,7 +122,7 @@
         <div class="result" role="status" aria-live="polite">
           <div class="row">
             <strong>SAC</strong>
-            <span class="pill" id="resultUnits">L/min</span>
+            <span class="pill">L/min</span>
           </div>
           <div class="value" id="sacValue">—</div>
           <div class="hint" id="sacDetail">Enter all four values to compute.</div>
@@ -160,38 +148,7 @@
         .catch((e) => { console.error(e); pill.textContent = 'Offline unavailable'; });
     })();
 
-    // Unit toggle state
-    const state = { imperial: false };
-    const unitSwitch = document.getElementById('unitSwitch');
-    const unitToggleWrap = document.getElementById('unitToggleWrap');
-    const unitLabel = document.getElementById('unitLabel');
-    const unitHint = document.getElementById('unitHint');
-    const gasUnits = document.getElementById('gasUnits');
-    const gasHint = document.getElementById('gasHint');
-    const resultUnits = document.getElementById('resultUnits');
-
-    function setMode(imperial){
-      state.imperial = imperial;
-      unitToggleWrap.setAttribute('aria-checked', imperial ? 'true' : 'false');
-      unitSwitch.classList.toggle('on', imperial);
-      unitLabel.textContent = imperial ? 'Imperial' : 'Metric';
-      unitHint.textContent = imperial ? 'Gas in PSI • Result ft³/min' : 'Gas in bar • Result L/min';
-      gasUnits.textContent = imperial ? 'psi' : 'bar';
-      gasHint.textContent = imperial ? 'Pressure drop in PSI (start − end). Cylinder size remains in litres.' : 'Pressure drop (start bar − end bar).';
-      resultUnits.textContent = imperial ? 'ft³/min' : 'L/min';
-      // Update placeholders for gas
-      const gas = document.getElementById('gas');
-      gas.placeholder = imperial ? 'e.g., 500' : 'e.g., 150';
-      // Recompute if possible
-      computeSAC();
-    }
-
-    unitToggleWrap.addEventListener('click', () => setMode(!state.imperial));
-    unitToggleWrap.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setMode(!state.imperial); }
-    });
-
-    // SAC calculation
+    // SAC calculation (metric-only, correct formula)
     const $ = sel => document.querySelector(sel);
     const timeEl = $('#time');
     const depthEl = $('#depth');
@@ -209,35 +166,22 @@
     function computeSAC(){
       const t = parsePosFloat(timeEl);
       const d = parsePosFloat(depthEl);
-      const gRaw = parsePosFloat(gasEl);
+      const g = parsePosFloat(gasEl);
       const c = parsePosFloat(cylEl);
 
-      if ([t,d,gRaw,c].some(x => !Number.isFinite(x)) || t === 0) {
+      if ([t,d,g,c].some(x => !Number.isFinite(x)) || t === 0) {
         valueEl.textContent = '—';
         detailEl.textContent = 'Enter valid non-negative numbers (time must be > 0).';
         detailEl.classList.remove('ok'); detailEl.classList.add('error');
         return;
       }
 
-      // Convert gas drop to bar if in imperial (PSI → bar), else keep as bar
-      const PSI_PER_BAR = 14.5037738;
-      const gasBar = state.imperial ? (gRaw / PSI_PER_BAR) : gRaw;
+      // SAC = (Gas Used * Cylinder Size) / (((Average Depth / 10) + 1) * Time At Depth)
+      const sac = (g * c) / (((d / 10) + 1) * t);
+      const rounded = Math.round(sac * 100) / 100;
 
-      // Base SAC in L/min
-      const lpm = (gasBar * c) / (((d / 10) + 1) * t);
-
-      // Output
-      if (state.imperial){
-        const CUBIC_FEET_PER_LITER = 1.0 / 28.316846592; // ft³ per L
-        const cfm = lpm * CUBIC_FEET_PER_LITER;
-        const rounded = Math.round(cfm * 100) / 100;
-        valueEl.textContent = Number.isFinite(rounded) ? `${rounded} ft³/min` : '—';
-        detailEl.textContent = `(Converted from L/min using 28.3168 L = 1 ft³)`;
-      } else {
-        const rounded = Math.round(lpm * 100) / 100;
-        valueEl.textContent = Number.isFinite(rounded) ? `${rounded} L/min` : '—';
-        detailEl.textContent = `Using g=${gRaw} ${state.imperial ? 'psi→bar' : 'bar'}, c=${c} L, d=${d} m, t=${t} min.`;
-      }
+      valueEl.textContent = Number.isFinite(rounded) ? `${rounded} L/min` : '—';
+      detailEl.textContent = `Using g=${g} bar, c=${c} L, d=${d} m, t=${t} min.`;
       detailEl.classList.remove('error'); detailEl.classList.add('ok');
     }
 
@@ -245,9 +189,6 @@
     [timeEl, depthEl, gasEl, cylEl].forEach(el => el.addEventListener('input', () => {
       if ([timeEl, depthEl, gasEl, cylEl].every(x => x.value.trim().length)) computeSAC();
     }));
-
-    // default mode
-    setMode(false);
   </script>
 </body>
 </html>
